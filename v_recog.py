@@ -10,7 +10,7 @@ from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
 
 d = '/Applications'
-greet = "Hello aisa"
+greet = "hello"
 records = []
 apps = os.listdir(d)
 for app in apps:
@@ -36,9 +36,12 @@ def search_es(query):
     })
     return res['hits']['hits'][0]['_source']['sys_command']
 
+def say(text):
+    subprocess.call(['say', text])
+
 def activate(phrase=greet):
     try:
-        with mic as source:
+        with sr.Microphone() as source:
             r.adjust_for_ambient_noise(source)
             audio = r.listen(source)
             transcript = r.recognize_google(audio)
@@ -54,10 +57,14 @@ duration = 1  # seconds
 r = sr.Recognizer()
 mic = sr.Microphone()
 
-while(True):   
+while(True): 
+    print("loop testing")
+    say("Hello Raghava")
+    t = activate()
+    print("you said: " +str(t))  
     if activate() == True:
         try:
-            say("Hey Kyle, how can I help you today?")
+            say("Hey Sai, how can I help you today?")
             with mic as source:
                 print("Say Something!")
                 r.adjust_for_ambient_noise(source)
@@ -70,8 +77,7 @@ while(True):
             pass
     else:
         pass
-#def say(text):
-#    subprocess.call(['say', text])
+
 
 #fs=44100
 #duration = 1  # seconds
