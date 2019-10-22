@@ -8,9 +8,10 @@ import speech_recognition as sr
 import subprocess
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
+from selenium import webdriver
 
 d = '/Applications'
-greet = "hello"
+greet = "hi"
 records = []
 apps = os.listdir(d)
 for app in apps:
@@ -52,16 +53,54 @@ def activate(phrase=greet):
     except:
         pass
 
-fs=44100
+def web_search(input):
+    driver = webdriver.chrome()
+    driver.implicitly_wait(1)
+    driver.maximize_window()
+    if 'youtube' in input.lower():
+        say("opening Youtube for you")
+        indx = input.lower().split().index('youtube')
+        query = input.split()[indx+1:]
+        driver.get('http://www.youtube.com/results?search_query='+'+'.join(query))
+        say('here you go')
+        return
+    elif 'wikipedia' in input.lower():
+        say("Opening wikipedia")
+        indx = input.lower().split().index('wikipedia')
+        query = input.split()[indx + 1: ]
+        driver.get('http://en.wikipedia.org/wiki/'+'_'.join(query))
+        say("Here is your information from wikipedia")
+        return
+    else: 
+        if 'google' in input.lower():
+            say("on it")
+            indx = input.lower().split().index('google')
+            query = inpit.split()[indx + 1: ]
+            driver.get('http://www.google.com/search?q='+ '+'.join(query))
+            say("Here are your google search results")
+            return
+        elif 'search' in input.lower():
+            say("on it")
+            indx = input.lower().split().index('google')
+            query = inpit.split()[indx + 1: ]
+            driver.get('http://www.google.com/search?q='+ '+'.join(query))
+            say("Here are your google search results")
+            return
+        else:
+            driver.get('http://www.google.com/search?q='+ '+'.join(input.split()))
+            say("These are your quick websearch results")
+fs=16000
 duration = 1  # seconds
 r = sr.Recognizer()
 mic = sr.Microphone()
 
 while(True): 
-    print("loop testing")
-    say("Hello Raghava")
-    t = activate()
-    print("you said: " +str(t))  
+    #print("loop testing")
+    #say("Hello Raghava")
+    #t = activate()
+    #print("you said: " +str(t))
+    print("listening.....")
+    say("Ahem")
     if activate() == True:
         try:
             say("Hey Sai, how can I help you today?")
@@ -69,41 +108,25 @@ while(True):
                 print("Say Something!")
                 r.adjust_for_ambient_noise(source)
                 audio = r.listen(source)
+                print("listened, working on it now")
                 transcript = r.recognize_google(audio)
-                sys_command = search_es(transcript)
-                os.system(sys_command)
-                say("I opened that application for you")
+                if 'open' in transcript.lower():
+                    sys_command = search_es(transcript)
+                    os.system(sys_command)
+                    say("I opened that application for you")
+                elif 'close' in str(transcript) or 'exit' in str(transcript):
+                    say("ok then, Bye")
+                    close_condition = 1
+                    break
+                else:
+                    web_search(transcript)
         except:
             pass
     else:
-        pass
+        say("could you please repeat")
+        #print("Did you say something")
+        #print(t)
 
 
-#fs=44100
-#duration = 1  # seconds
-#r = sr.Recognizer()
-#mic_name = sr.Microphone()
-#d = '/Applications'
-#records = []
-#apps = os.listdir(d)
-#for app in apps:
-#    record = {}
-#    record['voice_command'] = 'open ' + app.split('.app')[0]
-#    record['sys_command'] = 'open ' + d +'/%s' %app.replace(' ','\ ')
-#    records.append(record)
-#while(True):
-#    with mic_name as source:
-#        r.adjust_for_ambient_noise(source) 
-#        print ("Say Something")
-#        audio = r.listen(source)
-#        try: 
-#            text = r.recognize_google(audio) 
-#            print ("you said: " + text)
-            
-#        except sr.UnknownValueError: 
-#            print("Google Speech Recognition could not understand audio") 
-      
- #       except sr.RequestError as e: 
- #           print("Could not request results from Google  Speech Recognition service; {0}".format(e))
- #       say("Hello sai")        
+
         
